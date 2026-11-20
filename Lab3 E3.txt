@@ -1,0 +1,52 @@
+// Lab 3 - Experiment 3: threshold response with a start/stop button
+const int LDR_PIN = A0;
+const int LED_PIN = 10;
+const int BUTTON_PIN = 2;
+const int THRESHOLD = 650; // your value from Experiment 1
+const int SAMPLES = 10;
+bool armed = false; // state: false = DISARMED, true = ARMED 
+int lastButton = HIGH; // previous button reading (HIGH = released)
+
+
+
+int readLdrAverage(int n) {
+  long sum = 0;
+  for (int i = 0; i < n; i++) {
+    sum += analogRead(LDR_PIN);
+    delay(1);
+  }
+  return sum / n;
+}
+void setup() {
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  Serial.begin(9600);
+  Serial.println("DISARMED - press the button to start");
+}
+void loop() {
+ // 1. Button: react once per press (reading changes from HIGH to LOW)
+ int button = digitalRead(BUTTON_PIN);
+ if (button == LOW && lastButton == HIGH) {
+  armed = !armed; // switch state
+  if (armed) {
+    Serial.println("ARMED");
+    } else {
+      Serial.println("DISARMED");
+    }
+    delay(50); // ignore contact bounce
+    }
+ lastButton = button;
+ // 2. Sensor rule, applied only in the ARMED state
+ int ldrValue = readLdrAverage(SAMPLES);
+ if (armed && ldrValue > THRESHOLD) { // armed and dark
+ digitalWrite(LED_PIN, HIGH);
+ } else {
+ digitalWrite(LED_PIN, LOW);
+ }
+ // 3. Report
+ Serial.print("armed:");
+ Serial.print(armed); // prints 0 or 1
+ Serial.print(",ldr:");
+ Serial.println(ldrValue);
+ delay(50);
+}

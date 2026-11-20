@@ -1,0 +1,20 @@
+// Lab 3 - Experiment 1 (part B): average of several readings
+const int LDR_PIN = A0;
+const int SAMPLES = 10; // readings per average; try 1 and 50 too
+int readLdrAverage(int n) {
+ long sum = 0; // long: 50 x 1023 does not fit in an int
+ for (int i = 0; i < n; i++) {
+ sum += analogRead(LDR_PIN);
+ delay(1);
+ }
+ return sum / n;
+}
+void setup() {
+ Serial.begin(9600);
+}
+void loop() {
+ int ldrValue = readLdrAverage(SAMPLES);
+ Serial.print("ldr:");
+ Serial.println(ldrValue);
+ delay(200);
+}
